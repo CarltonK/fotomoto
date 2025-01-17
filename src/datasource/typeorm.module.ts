@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import { Global, Inject, Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { ConfigService } from '@nestjs/config';
@@ -13,13 +13,28 @@ import { ConfigService } from '@nestjs/config';
       inject: [ConfigService, WINSTON_MODULE_PROVIDER],
       useFactory: async (configService: ConfigService, logger: Logger) => {
         try {
+          logger.info('Initializing database connection...', {
+            context: 'TypeOrmModule',
+          });
+
+          const databaseUrl = configService.get<string>('DATABASE_URL');
+          const env = configService.get<string>('NODE_ENV');
+
+          if (!databaseUrl) {
+            throw new Error(
+              'DATABASE_URL is not defined in the environment variables',
+            );
+          }
+
           const dataSource = new DataSource({
             type: 'postgres',
-            url: configService.get<string>('DATABASE_URL'),
+            url: databaseUrl,
             entities: [`${__dirname}/../**/**.entity{.ts,.js}`],
+            synchronize: env === 'production' ? false : true,
           });
 
           await dataSource.initialize();
+
           logger.info('Database connected successfully', {
             context: 'TypeOrmModule',
           });
@@ -37,12 +52,4 @@ import { ConfigService } from '@nestjs/config';
   ],
   exports: [DataSource],
 })
-export class TypeOrmModule {
-  constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly _logger: Logger,
-  ) {
-    this._logger.info('Initializing database connection', {
-      context: 'TypeOrmModule',
-    });
-  }
-}
+export class TypeOrmModule { }
