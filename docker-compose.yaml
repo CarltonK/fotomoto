@@ -1,7 +1,7 @@
 version: '3.6'
 
 services:
-  postgres:
+  db:
     container_name: fotomoto_db
     image: postgres:17
     restart: unless-stopped
@@ -47,14 +47,14 @@ services:
       - type: bind
         source: ./tsconfig.json
         target: /app/tsconfig.json
-      - type: bind
-        source: ~/.config/gcloud/application_default_credentials.json
-        target: /app/application_default_credentials.json
+      # - type: bind
+      #   source: ~/.config/gcloud/application_default_credentials.json
+      #   target: /app/application_default_credentials.json
     networks:
       backend_network:
         ipv4_address: 172.37.0.3
     depends_on:
-      - postgres
+      - db
     ports:
       - 3000:3000
     environment:
@@ -62,9 +62,10 @@ services:
       NODE_ENV: 'local'
       GOOGLE_CLOUD_PROJECT: '<PROJECT_ID>'
       LOG_LEVEL: 'info'
-      GOOGLE_APPLICATION_CREDENTIALS: '/app/application_default_credentials.json'
+      # GOOGLE_APPLICATION_CREDENTIALS: '/app/application_default_credentials.json'
       WORKSPACE: 'dev'
       LOCATION: 'europe-west1'
+      DATABASE_URL: 'postgresql://fotomoto_db_user:fotomoto_db_password@172.37.0.2:5432/fotomoto_db?connection_limit=1'
 volumes:
   fotomoto:
 networks:
