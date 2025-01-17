@@ -1,0 +1,62 @@
+steps:
+  - id: 'Lint application'
+    name: node:22.8
+    entrypoint: sh
+    args:
+      [
+        '/workspace/cloudbuild/scripts/lint.sh',
+      ]
+
+  - id: 'Build docker image'
+    name: 'gcr.io/cloud-builders/docker'
+    entrypoint: sh
+    args:
+      [
+        '/workspace/cloudbuild/scripts/build-docker-image.sh',
+        '${_PROJECT_ID}',
+        '${_PROJECT_SERVICE}',
+        '$SHORT_SHA',
+        '${_PROJECT_REGION}',
+        '${_WORKSPACE}',
+      ]
+
+  - id: 'Image efficiency scan'
+    name: 'quay.io/wagoodman/dive'
+    args:
+      [
+        '--ci',
+        '${_PROJECT_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_WORKSPACE}/${_PROJECT_SERVICE}:$SHORT_SHA',
+      ]
+
+  - id: 'Image security scan'
+    name: 'aquasec/trivy:latest'
+    args:
+      [
+        'image',
+        '--severity',
+        'CRITICAL',
+        '--exit-code',
+        '1',
+        '${_PROJECT_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_WORKSPACE}/${_PROJECT_SERVICE}:$SHORT_SHA',
+      ]
+
+  - id: 'Deploy image to Cloud Run'
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: sh
+    args:
+      [
+        '/workspace/cloudbuild/scripts/deploy-cloud-run.sh',
+        '${_PROJECT_SERVICE}',
+        '${_PROJECT_ID}',
+        '${_PROJECT_REGION}',
+        '$SHORT_SHA',
+        '1', # MIN SCALE
+        '3', # MAX SCALE
+        'production', # '${_NODE_ENV}',
+        '${_API_SA}',
+        '${_WORKSPACE}',
+      ]
+images:
+  - '${_PROJECT_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_WORKSPACE}/${_PROJECT_SERVICE}:$SHORT_SHA'
+timeout: 1000s
+logsBucket: 'gs://fotomoto-build-logs-v2/api'

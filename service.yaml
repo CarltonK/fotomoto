@@ -1,0 +1,39 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/ingress-status: all
+  name: '<PROJECT_SERVICE>'
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '<MAX_SCALE>'
+        autoscaling.knative.dev/minScale: '<MIN_SCALE>'
+        run.googleapis.com/startup-cpu-boost: 'true'
+        # run.googleapis.com/vpc-access-connector: '<VPC_CONNECTOR>'
+        # run.googleapis.com/cpu-throttling: 'false'
+        # run.googleapis.com/cloudsql-instances: '<DATABASE_INSTANCE_CONNECTION_NAME>'
+        run.googleapis.com/sessionAffinity: 'true' # Enable requests being routed to the same instance
+    spec:
+      timeoutSeconds: 300
+      serviceAccountName: '<FOTOMOTO_SA>'
+      containers:
+        - image: <FOTOMOTO_CONTAINER_IMAGE>
+          ports:
+            - containerPort: 8080
+          env:
+            - name: NODE_ENV
+              value: '<NODE_ENV>'
+            - name: WORKSPACE
+              value: '<WORKSPACE>'
+            - name: GOOGLE_CLOUD_PROJECT
+              value: '<GOOGLE_CLOUD_PROJECT>'
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+  traffic:
+    - latestRevision: true
+      percent: 100

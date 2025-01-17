@@ -1,0 +1,75 @@
+version: '3.6'
+
+services:
+  postgres:
+    container_name: fotomoto_db
+    image: postgres:17
+    restart: unless-stopped
+    volumes:
+      - fotomoto:/var/lib/postgresql/data
+    networks:
+      backend_network:
+        ipv4_address: 172.37.0.2
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: "fotomoto_db_user"
+      POSTGRES_PASSWORD: "fotomoto_db_password"
+      POSTGRES_DB: "fotomoto_db"
+      PGDATA: /var/lib/postgresql/data/fotomoto_db/
+  # pgadmin:
+  #   container_name: fotomoto_db_client
+  #   image: dpage/pgadmin4
+  #   restart: unless-stopped
+  #   volumes:
+  #     - fotomoto:/var/lib/pgadmin
+  #   network_mode: host
+  #   depends_on:
+  #     - postgres
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: "client@fotomoto.com"
+  #     PGADMIN_DEFAULT_PASSWORD: "client"
+  #     PGADMIN_LISTEN_PORT: 5050
+  #     PGADMIN_CONFIG_CONSOLE_LOG_LEVEL: 1
+  fotomoto:
+    container_name: fotomoto_app
+    build:
+      context: .
+      dockerfile: docker/dev.Dockerfile
+    volumes:
+      # Binds volume to enable working through docker locally
+      - type: bind
+        source: ./src/
+        target: /app/src/
+      - type: bind
+        source: ./package.json
+        target: /app/package.json
+      - type: bind
+        source: ./tsconfig.json
+        target: /app/tsconfig.json
+      - type: bind
+        source: ~/.config/gcloud/application_default_credentials.json
+        target: /app/application_default_credentials.json
+    networks:
+      backend_network:
+        ipv4_address: 172.37.0.3
+    depends_on:
+      - postgres
+    ports:
+      - 3000:3000
+    environment:
+      PORT: 3000
+      NODE_ENV: 'local'
+      GOOGLE_CLOUD_PROJECT: '<PROJECT_ID>'
+      LOG_LEVEL: 'info'
+      GOOGLE_APPLICATION_CREDENTIALS: '/app/application_default_credentials.json'
+      WORKSPACE: 'dev'
+      LOCATION: 'europe-west1'
+volumes:
+  fotomoto:
+networks:
+  backend_network:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.37.0.0/16
