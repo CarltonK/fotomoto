@@ -8,6 +8,7 @@ import { WinstonModule } from 'nest-winston';
 import { winstonConfig } from './utils/logging/winston.config';
 import { UsersModule } from './users/users.module';
 import { PhotosModule } from './photos/photos.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -26,6 +27,8 @@ import { PhotosModule } from './photos/photos.module';
     UsersModule,
 
     PhotosModule,
+
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
