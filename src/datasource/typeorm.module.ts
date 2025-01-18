@@ -17,7 +17,10 @@ import { ConfigService } from '@nestjs/config';
             context: 'TypeOrmModule',
           });
 
-          const databaseUrl = configService.get<string>('DATABASE_URL');
+          const backendSecrets = JSON.parse(
+            configService.get<string>('BACKEND_SECRETS'),
+          );
+          const { databaseUrl } = backendSecrets;
           const env = configService.get<string>('NODE_ENV');
 
           if (!databaseUrl) {
@@ -52,4 +55,4 @@ import { ConfigService } from '@nestjs/config';
   ],
   exports: [DataSource],
 })
-export class TypeOrmModule { }
+export class TypeOrmModule {}

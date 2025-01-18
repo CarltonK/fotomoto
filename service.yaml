@@ -16,6 +16,7 @@ spec:
         # run.googleapis.com/cpu-throttling: 'false'
         # run.googleapis.com/cloudsql-instances: '<DATABASE_INSTANCE_CONNECTION_NAME>'
         run.googleapis.com/sessionAffinity: 'true' # Enable requests being routed to the same instance
+        run.googleapis.com/secrets: 'backend-secrets:projects/<PROJECT_NUMBER>/secrets/<WORKSPACE>-backend'
     spec:
       timeoutSeconds: 300
       serviceAccountName: '<FOTOMOTO_SA>'
@@ -30,6 +31,11 @@ spec:
               value: '<WORKSPACE>'
             - name: GOOGLE_CLOUD_PROJECT
               value: '<GOOGLE_CLOUD_PROJECT>'
+            - name: BACKEND_SECRETS
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: backend-secrets
           resources:
             limits:
               cpu: 1000m

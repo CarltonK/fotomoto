@@ -9,6 +9,7 @@ import { winstonConfig } from './utils/logging/winston.config';
 import { UsersModule } from './users/users.module';
 import { PhotosModule } from './photos/photos.module';
 import { AuthModule } from './auth/auth.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
   imports: [
@@ -18,17 +19,13 @@ import { AuthModule } from './auth/auth.module';
       cache: true,
       load: [configuration],
     }),
-
     // Global Logger Module
     WinstonModule.forRoot(winstonConfig),
-
     TypeOrmModule,
-
     UsersModule,
-
     PhotosModule,
-
     AuthModule,
+    FirebaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

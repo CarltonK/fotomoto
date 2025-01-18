@@ -65,7 +65,7 @@ services:
       # GOOGLE_APPLICATION_CREDENTIALS: '/app/application_default_credentials.json'
       WORKSPACE: 'dev'
       LOCATION: 'europe-west1'
-      DATABASE_URL: 'postgresql://fotomoto_db_user:fotomoto_db_password@172.37.0.2:5432/fotomoto_db?connection_limit=1'
+      BACKEND_SECRETS: '{"apiKey":"","authDomain":"", "databaseUrl":"postgresql://fotomoto_db_user:fotomoto_db_password@172.37.0.2:5432/fotomoto_db?connection_limit=1"}'
 volumes:
   fotomoto:
 networks:
