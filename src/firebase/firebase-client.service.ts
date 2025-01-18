@@ -7,10 +7,11 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
+  signOut,
 } from 'firebase/auth';
 
 @Injectable()
-export class FirebaseService implements OnModuleInit {
+export class FirebaseClientService implements OnModuleInit {
   private firebaseApp: FirebaseApp;
   private firebaseAuth: Auth;
 
@@ -60,6 +61,13 @@ export class FirebaseService implements OnModuleInit {
     );
     // Generate an ID Token from firebase. Replaces need for a custom passport strategy for auth
     return await userCredential.user.getIdToken();
+  }
+
+  /**
+   * Logout
+   */
+  async logout() {
+    return await signOut(this.auth);
   }
 
   /**
