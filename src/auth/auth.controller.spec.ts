@@ -11,10 +11,7 @@ describe('AuthController', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [FirebaseModule],
       controllers: [AuthController],
-      providers: [
-        mockLoggerProvider,
-        AuthService
-      ],
+      providers: [mockLoggerProvider, AuthService],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
