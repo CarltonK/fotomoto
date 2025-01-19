@@ -33,7 +33,7 @@ export class FirebaseAuthGuard implements CanActivate {
 
       return true;
     } catch (error) {
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException(`Invalid token: ${error.message}`);
     }
   }
 
