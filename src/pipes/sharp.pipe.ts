@@ -11,20 +11,28 @@ export class SharpPipe implements PipeTransform<any[], Promise<any[]>> {
 
     const processedFiles = await Promise.all(
       images.map(async (image) => {
+        if (!image.buffer) {
+          throw new BadRequestException('File buffer is missing');
+        }
+
         const originalName = path.parse(image.originalname).name;
         const filename = Date.now() + '-' + originalName + '.webp';
 
-        // Process the image with sharp
-        const buffer = await sharp(image.buffer)
-          .resize(800)
-          .webp({ quality: 65 })
-          .toBuffer();
+        try {
+          // Process the image with sharp
+          const buffer = await sharp(image.buffer)
+            .resize(800)
+            .webp({ quality: 65 })
+            .toBuffer();
 
-        return {
-          ...image,
-          buffer, // Replace original buffer with processed buffer
-          filename,
-        };
+          return {
+            ...image,
+            buffer, // Replace original buffer with processed buffer
+            filename,
+          };
+        } catch (error) {
+          throw new BadRequestException('Failed to process image');
+        }
       }),
     );
 

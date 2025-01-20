@@ -32,8 +32,8 @@ export class PhotosService {
     }
 
     // Check user in db
-    // Find the user in the database
     const user = await this.userRepository.findOneBy({ uid });
+    const { id: userId } = user;
     if (!user) {
       throw new BadRequestException('User not found');
     }
@@ -58,7 +58,7 @@ export class PhotosService {
 
       const photo = this.photoRepository.create({
         url: publicUrl,
-        user: { uid },
+        user: { id: userId },
       });
 
       await this.photoRepository.save(photo);
@@ -72,6 +72,7 @@ export class PhotosService {
     return await this.photoRepository.find({
       where: { user: { uid } },
       order: { createdAt: 'DESC' },
+      relations: ['user'],
     });
   }
 
@@ -89,7 +90,7 @@ export class PhotosService {
       throw new NotFoundException('Photo not found');
     }
 
-    // Delete from GCS
+    // TODO: Delete from GCS
 
     await this.photoRepository.remove(photo);
   }

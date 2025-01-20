@@ -4,6 +4,7 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -18,9 +19,18 @@ export class FeedController {
   @UseGuards(FirebaseAuthGuard)
   @Get()
   @HttpCode(200)
-  async fetchFeed(@Req() req: any, @Res() res: Response) {
+  async fetchFeed(
+    @Req() req: any,
+    @Res() res: Response,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+  ) {
     const { uid } = req.user;
-    const feed = await this.feedService.fetchFeed(uid);
+
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+
+    const feed = await this.feedService.fetchFeed(uid, pageNumber, limitNumber);
     return res.status(HttpStatus.OK).json({
       status: true,
       message: 'Feed retrieved successfully',

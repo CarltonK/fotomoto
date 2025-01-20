@@ -13,6 +13,7 @@ import {
   Param,
   ParseIntPipe,
   UploadedFiles,
+  Header,
 } from '@nestjs/common';
 import { PhotosService } from './photos.service';
 import { FirebaseAuthGuard } from './../auth/guard/firebase-auth.guard';
@@ -26,9 +27,10 @@ export class PhotosController {
   constructor(private readonly photosService: PhotosService) {}
 
   @UseGuards(FirebaseAuthGuard)
-  @UseInterceptors(FilesInterceptor('images'))
+  @UseInterceptors(FilesInterceptor('photo'))
   @Post('/upload')
-  @HttpCode(201)
+  @Header('Content-Type', 'application/json')
+  @HttpCode(200)
   async uploadPhotos(
     @Req() req: any,
     @Res() res: Response,
@@ -36,7 +38,7 @@ export class PhotosController {
   ) {
     const { uid } = req.user;
     const photos = await this.photosService.uploadPhotos(uid, files);
-    return res.status(HttpStatus.CREATED).json({
+    return res.status(HttpStatus.OK).json({
       status: true,
       message: 'Photo uploaded successfully',
       photos,
