@@ -19,6 +19,7 @@ import { FirebaseAuthGuard } from './../auth/guard/firebase-auth.guard';
 import { Response } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { SharpPipe } from './../pipes/sharp.pipe';
+import { CommentDto } from './dto/post-comment.dto';
 
 @Controller('photos')
 export class PhotosController {
@@ -34,12 +35,11 @@ export class PhotosController {
     @UploadedFiles(SharpPipe) files: any[],
   ) {
     const { uid } = req.user;
-    const photo = await this.photosService.uploadPhotos(uid);
+    const photos = await this.photosService.uploadPhotos(uid, files);
     return res.status(HttpStatus.CREATED).json({
       status: true,
       message: 'Photo uploaded successfully',
-      photo,
-      files,
+      photos,
     });
   }
 
@@ -76,16 +76,13 @@ export class PhotosController {
     @Req() req: any,
     @Res() res: Response,
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: any,
   ) {
     const { uid } = req.user;
-    await this.photosService.likePhoto(uid, id, dto);
-
-    const { like } = dto;
+    await this.photosService.likePhoto(uid, id);
 
     return res.status(HttpStatus.OK).json({
       status: true,
-      message: `Photos ${like ? 'liked' : 'unliked'} successfully`,
+      message: ``,
     });
   }
 
@@ -96,7 +93,7 @@ export class PhotosController {
     @Req() req: any,
     @Res() res: Response,
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: any,
+    @Body() dto: CommentDto,
   ) {
     const { uid } = req.user;
     await this.photosService.commentOnPhoto(uid, id, dto);
@@ -111,16 +108,14 @@ export class PhotosController {
   @Get('/:id')
   @HttpCode(200)
   async fetchPhoto(
-    @Req() req: any,
     @Res() res: Response,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const { uid } = req.user;
-    const photos = await this.photosService.fetchSinglePhoto(uid, id);
+    const photo = await this.photosService.fetchSinglePhoto(id);
     return res.status(HttpStatus.OK).json({
       status: true,
       message: 'Photo retrieved successfully',
-      photos,
+      photo,
     });
   }
 }

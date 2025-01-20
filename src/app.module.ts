@@ -13,6 +13,7 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { SearchModule } from './search/search.module';
 import { FeedModule } from './feed/feed.module';
+import { GcsModule } from './gcs/gcs.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { FeedModule } from './feed/feed.module';
     FirebaseModule,
     SearchModule,
     FeedModule,
+    GcsModule,
   ],
   controllers: [AppController],
   providers: [AppService, AllExceptionsFilter],
