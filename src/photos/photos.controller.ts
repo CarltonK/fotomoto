@@ -82,11 +82,10 @@ export class PhotosController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     const { uid } = req.user;
-    await this.photosService.likePhoto(uid, id);
-
+    const liked = await this.photosService.likePhoto(uid, id);
     return res.status(HttpStatus.OK).json({
       status: true,
-      message: ``,
+      message: `Photo ${liked ? 'unliked' : 'liked'} successfully`,
     });
   }
 
@@ -115,11 +114,11 @@ export class PhotosController {
     @Res() res: Response,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const photo = await this.photosService.fetchSinglePhoto(id);
+    const data = await this.photosService.fetchSinglePhoto(id);
     return res.status(HttpStatus.OK).json({
       status: true,
       message: 'Photo retrieved successfully',
-      photo,
+      data,
     });
   }
 }

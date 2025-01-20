@@ -106,7 +106,24 @@ export class PhotosService {
   }
 
   async fetchSinglePhoto(id: number) {
-    return await this.photoRepository.findOneBy({ id });
+    const photo = await this.photoRepository.findOne({
+      where: { id },
+      relations: ['likes', 'comments', 'likes.user', 'comments.user'],
+      select: {
+        likes: { id: true, likedAt: true, user: { username: true } },
+        comments: {
+          id: true,
+          text: true,
+          commentedAt: true,
+          user: { username: true },
+        },
+      },
+    });
+
+    const likesCount = photo.likes.length;
+    const commentsCount = photo.comments.length;
+
+    return { photo, likesCount, commentsCount };
   }
 
   async deletePhoto(uid: string, id: number): Promise<void> {
@@ -143,7 +160,7 @@ export class PhotosService {
     if (existingLike) {
       // Unlike the photo
       await this.likeRepository.remove(existingLike);
-      return;
+      return existingLike;
     }
 
     // Like the photo
@@ -152,7 +169,7 @@ export class PhotosService {
       photo,
     });
     await this.likeRepository.save(like);
-    return;
+    return existingLike;
   }
 
   async commentOnPhoto(
@@ -178,7 +195,6 @@ export class PhotosService {
       text,
     });
     await this.commentRepository.save(comment);
-
     return;
   }
 }
