@@ -1,0 +1,14 @@
+# Generated
+node_modules/
+dist/
+
+# Static
+.github
+.vscode
+
+# GCP
+cloudbuild
+service.yaml
+
+# TXT
+README.md
