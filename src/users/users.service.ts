@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -26,10 +30,73 @@ export class UsersService {
   }
 
   async followProfile(uid: string, id: number) {
-    return { uid, id };
+    // Current user
+    const followingUser = await this.userRepository.findOne({
+      where: { uid },
+      relations: ['followers', 'following'],
+    });
+
+    // User to be followed
+    const followedUser = await this.userRepository.findOne({
+      where: { id },
+      relations: ['followers', 'following'],
+    });
+
+    if (!followingUser || !followedUser) {
+      throw new NotFoundException('User(s) not found');
+    }
+
+    // Avoid self following
+    if (followingUser.id === followedUser.id) {
+      throw new BadRequestException('You cannot follow yourself');
+    }
+
+    if (followingUser.following.some((user) => user.id === followedUser.id)) {
+      throw new BadRequestException('You are already following this user');
+    }
+
+    followingUser.following.push(followedUser);
+    followedUser.followers.push(followingUser);
+
+    await this.userRepository.save(followingUser);
+    await this.userRepository.save(followedUser);
   }
 
   async unfollowProfile(uid: string, id: number) {
-    return { uid, id };
+    // Current user
+    const followingUser = await this.userRepository.findOne({
+      where: { uid },
+      relations: ['followers', 'following'],
+    });
+
+    // User to be unfollowed
+    const unfollowedUser = await this.userRepository.findOne({
+      where: { id },
+      relations: ['followers', 'following'],
+    });
+
+    if (!followingUser || !unfollowedUser) {
+      throw new NotFoundException('User(s) not found');
+    }
+
+    // Check if following in first place
+    if (
+      !followingUser.following.some((user) => user.id === unfollowedUser.id)
+    ) {
+      throw new BadRequestException('You are not following this user');
+    }
+
+    // Remove the unfollowedUser from the followingUser's following list
+    followingUser.following = followingUser.following.filter(
+      (user) => user.id !== unfollowedUser.id,
+    );
+
+    // Remove the followingUser from the unfollowedUser's followers list
+    unfollowedUser.followers = unfollowedUser.followers.filter(
+      (user) => user.id !== followingUser.id,
+    );
+
+    await this.userRepository.save(followingUser);
+    await this.userRepository.save(unfollowedUser);
   }
 }

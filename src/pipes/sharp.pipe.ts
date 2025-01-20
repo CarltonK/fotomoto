@@ -31,7 +31,9 @@ export class SharpPipe implements PipeTransform<any[], Promise<any[]>> {
             filename,
           };
         } catch (error) {
-          throw new BadRequestException('Failed to process image');
+          throw new BadRequestException(
+            `Failed to process image: ${error.message}`,
+          );
         }
       }),
     );

@@ -21,6 +21,7 @@ import { Response } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { SharpPipe } from './../pipes/sharp.pipe';
 import { CommentDto } from './dto/post-comment.dto';
+import { CreatePhotoDto } from './dto/create-photo.dto';
 
 @Controller('photos')
 export class PhotosController {
@@ -35,9 +36,10 @@ export class PhotosController {
     @Req() req: any,
     @Res() res: Response,
     @UploadedFiles(SharpPipe) files: any[],
+    @Body() body: CreatePhotoDto,
   ) {
     const { uid } = req.user;
-    const photos = await this.photosService.uploadPhotos(uid, files);
+    const photos = await this.photosService.uploadPhotos(uid, files, body);
     return res.status(HttpStatus.OK).json({
       status: true,
       message: 'Photo uploaded successfully',
@@ -80,11 +82,10 @@ export class PhotosController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     const { uid } = req.user;
-    await this.photosService.likePhoto(uid, id);
-
+    const liked = await this.photosService.likePhoto(uid, id);
     return res.status(HttpStatus.OK).json({
       status: true,
-      message: ``,
+      message: `Photo ${liked ? 'unliked' : 'liked'} successfully`,
     });
   }
 
@@ -113,11 +114,11 @@ export class PhotosController {
     @Res() res: Response,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const photo = await this.photosService.fetchSinglePhoto(id);
+    const data = await this.photosService.fetchSinglePhoto(id);
     return res.status(HttpStatus.OK).json({
       status: true,
       message: 'Photo retrieved successfully',
-      photo,
+      data,
     });
   }
 }
