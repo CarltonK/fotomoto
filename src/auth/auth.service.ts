@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { FirebaseClientService } from './../firebase/firebase-client.service';
 import { AuthUserDto } from '../users/dto/auth-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './../users/entities/user.entity';
+import { Repository } from 'typeorm';
+import { CreateUser } from './../users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -8,10 +12,11 @@ export class AuthService {
   constructor(
     @Inject(FirebaseClientService)
     private readonly _firebaseClientService: FirebaseClientService,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  async createUser(dto: AuthUserDto) {
-    const { emailAddress, password } = dto;
+  async createUser(dto: CreateUser): Promise<User> {
+    const { emailAddress, password, username } = dto;
     try {
       const userCredential = await this._firebaseClientService.createUser(
         emailAddress,
@@ -21,8 +26,13 @@ export class AuthService {
       const { uid } = user;
 
       // Create user in SQL database with the uid above as a primary / secondary unique identifier
+      const userEntity = this.userRepository.create({
+        uid,
+        username,
+        emailAddress,
+      });
 
-      return uid;
+      return await this.userRepository.save(userEntity);
     } catch (error) {
       throw error;
     }

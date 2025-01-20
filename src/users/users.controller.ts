@@ -1,6 +1,7 @@
 import {
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -20,11 +21,13 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @UseGuards(FirebaseAuthGuard)
-  @Put('/:username')
+  @Get('/:username')
   @HttpCode(200)
-  async fetchProfile(@Req() req: any, @Res() res: Response) {
-    const { uid } = req.user;
-    const profile = await this.usersService.fetchProfile(uid);
+  async fetchProfile(
+    @Res() res: Response,
+    @Param('username') username: string,
+  ) {
+    const profile = await this.usersService.fetchProfile(username);
     return res.status(HttpStatus.OK).json({
       status: true,
       message: 'Profile retrieved successfully',

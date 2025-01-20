@@ -12,6 +12,7 @@ import { AuthService } from './auth.service';
 import { FirebaseAuthGuard } from './guard/firebase-auth.guard';
 import { Response } from 'express';
 import { AuthUserDto } from '../users/dto/auth-user.dto';
+import { CreateUser } from './../users/dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -20,7 +21,7 @@ export class AuthController {
   @Post('register')
   @HttpCode(201)
   @Header('Content-Type', 'application/json')
-  async createUser(@Res() res: Response, @Body() userDto: AuthUserDto) {
+  async createUser(@Res() res: Response, @Body() userDto: CreateUser) {
     const user = await this.authService.createUser(userDto);
     return res.status(HttpStatus.CREATED).json({
       status: true,
