@@ -1,9 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePhotoDto } from './dto/create-photo.dto';
 
 @Injectable()
 export class PhotosService {
-  create(createPhotoDto: CreatePhotoDto) {
-    return createPhotoDto;
+  constructor() {}
+
+  async uploadPhotos(uid: string) {
+    return uid;
+  }
+
+  async fetchPhotos(uid: string) {
+    return uid;
+  }
+
+  async fetchSinglePhoto(uid: string, id: number) {
+    return { uid, id };
+  }
+
+  async deletePhoto(uid: string, id: number) {
+    return { uid, id };
+  }
+
+  async likePhoto(uid: string, id: number, dto: any) {
+    return { uid, id, dto };
+  }
+
+  async commentOnPhoto(uid: string, id: number, dto: any) {
+    return { uid, id, dto };
   }
 }

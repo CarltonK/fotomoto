@@ -11,6 +11,8 @@ import { PhotosModule } from './photos/photos.module';
 import { AuthModule } from './auth/auth.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { AllExceptionsFilter } from './filters/all-exceptions.filter';
+import { SearchModule } from './search/search.module';
+import { FeedModule } from './feed/feed.module';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { AllExceptionsFilter } from './filters/all-exceptions.filter';
     PhotosModule,
     AuthModule,
     FirebaseModule,
+    SearchModule,
+    FeedModule,
   ],
   controllers: [AppController],
   providers: [AppService, AllExceptionsFilter],

@@ -1,20 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PhotosController } from './photos.controller';
-import { PhotosService } from './photos.service';
+import { SearchController } from './search.controller';
 import { FirebaseModule } from './../firebase/firebase.module';
+import { SearchService } from './search.service';
 import { mockLoggerProvider } from './../utils/test/mock-logger';
 
-describe('PhotosController', () => {
-  let controller: PhotosController;
+describe('SearchController', () => {
+  let controller: SearchController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [FirebaseModule],
-      controllers: [PhotosController],
-      providers: [mockLoggerProvider, PhotosService],
+      controllers: [SearchController],
+      providers: [mockLoggerProvider, SearchService],
     }).compile();
 
-    controller = module.get<PhotosController>(PhotosController);
+    controller = module.get<SearchController>(SearchController);
   });
 
   it('should be defined', () => {
