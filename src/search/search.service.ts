@@ -2,16 +2,28 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Photo } from './../photos/entities/photo.entity';
 import { Like, Repository } from 'typeorm';
+import { User } from './../users/entities/user.entity';
 
 @Injectable()
 export class SearchService {
   constructor(
     @InjectRepository(Photo)
     private photoRepository: Repository<Photo>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async fetchUsersByUsername(username: string) {
-    return username;
+    return this.userRepository.find({
+      where: {
+        username: Like(`%${username}%`),
+      },
+      select: {
+        username: true,
+        photos: { id: true, url: true, createdAt: true },
+      },
+      relations: ['photos'],
+    });
   }
 
   async fetchPhotosByKeyword(keyword: string, page: number, limit: number) {

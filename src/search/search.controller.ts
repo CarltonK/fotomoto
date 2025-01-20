@@ -5,7 +5,6 @@ import {
   HttpStatus,
   Inject,
   Query,
-  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -22,9 +21,11 @@ export class SearchController {
   @UseGuards(FirebaseAuthGuard)
   @Get('/users')
   @HttpCode(200)
-  async fetchUsersByUsername(@Req() req: any, @Res() res: Response) {
-    const { uid } = req.user;
-    const user = await this.searchService.fetchUsersByUsername(uid);
+  async fetchUsersByUsername(
+    @Res() res: Response,
+    @Query('username') username: string,
+  ) {
+    const user = await this.searchService.fetchUsersByUsername(username);
     return res.status(HttpStatus.OK).json({
       status: true,
       message: 'Profile retrieved successfully',
