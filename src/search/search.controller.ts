@@ -4,6 +4,7 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -34,9 +35,34 @@ export class SearchController {
   @UseGuards(FirebaseAuthGuard)
   @Get('/photos')
   @HttpCode(200)
-  async fetchPhotosByKeywords(@Req() req: any, @Res() res: Response) {
-    const { uid } = req.user;
-    const photos = await this.searchService.fetchPhotosByKeyword(uid);
+  async fetchPhotosByKeywords(
+    @Res() res: Response,
+    @Query('keyword') keyword: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+  ) {
+    if (!keyword) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        status: false,
+        message: 'Keyword must be provided',
+      });
+    }
+
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+
+    if (pageNumber < 1 || limitNumber < 1) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        status: false,
+        message: 'Page and limit must be positive integers',
+      });
+    }
+
+    const photos = await this.searchService.fetchPhotosByKeyword(
+      keyword,
+      pageNumber,
+      limitNumber,
+    );
     return res.status(HttpStatus.OK).json({
       status: true,
       message: 'Photos retrieved successfully',
