@@ -44,3 +44,7 @@ $ docker-compose up
 
 The docker compose contains a commented out pgadmin service. Uncomment this and restart the containers to spin up pgadmin.
 It will be accessible on http://localhost:5050 with the provided credentials on the container definition.
+
+
+# Interacting with the API
+The API endpoints are defined on postman and the link can be found [here](https://api.postman.com/collections/5305865-9ace42ff-92fc-468c-b18c-ac09cb60bb16?access_key=PMAT-01JJ2ABZ9HX8YSWJ4ENTBA54EQ)
