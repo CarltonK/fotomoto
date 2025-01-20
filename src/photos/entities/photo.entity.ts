@@ -5,7 +5,6 @@ import {
   Column,
   ManyToOne,
   OneToMany,
-  // JoinColumn,
 } from 'typeorm';
 import { Like } from './likes.entity';
 import { Comment } from './../../photos/entities/comments.entity';
@@ -21,8 +20,10 @@ export class Photo {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
+  @Column({ type: 'varchar', unique: false, nullable: true })
+  fileName: string;
+
   @ManyToOne(() => User, (user) => user.photos, { eager: true })
-  // @JoinColumn({ name: 'user_uid', referencedColumnName: 'uid' })
   user: User;
 
   @OneToMany(() => Comment, (comment) => comment.photo)

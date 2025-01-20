@@ -13,6 +13,7 @@ import { Comment } from './../photos/entities/comments.entity';
 import { CommentDto } from './dto/post-comment.dto';
 import { GcsService } from './../gcs/gcs.service';
 import { v4 as uuidv4 } from 'uuid';
+import { CreatePhotoDto } from './dto/create-photo.dto';
 
 @Injectable()
 export class PhotosService {
@@ -26,7 +27,16 @@ export class PhotosService {
     @Inject(GcsService) private readonly _gcsService: GcsService,
   ) {}
 
-  async uploadPhotos(uid: string, files: any[]) {
+  async uploadPhotos(uid: string, files: any[], dto: CreatePhotoDto) {
+    const { description } = dto;
+
+    let tags: undefined | string[] = undefined;
+    tags = dto.tags;
+
+    if (tags) {
+      tags = JSON.parse(JSON.stringify(tags));
+    }
+
     if (!files || (Array.isArray(files) && files.length < 1)) {
       throw new BadRequestException('Files to be uploaded must be provided');
     }
@@ -38,9 +48,25 @@ export class PhotosService {
       throw new BadRequestException('User not found');
     }
 
+    // File validation
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const maxFileSize = 5 * 1024 * 1024; // 5MB
+
     const bucket = this._gcsService.initializeGcs();
     // Batch GCS Upload
     const uploadPromises = files.map(async (file: any) => {
+      // Type check
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        throw new BadRequestException(
+          `Invalid file type. Only ${allowedMimeTypes.join(', ')} are allowed.`,
+        );
+      }
+
+      // Size Check
+      if (file.size > maxFileSize) {
+        throw new BadRequestException(`File size exceeds the limit of 5MB.`);
+      }
+
       const filePath = `${uid}/${uuidv4()}_${file.originalname}`;
       const blob = bucket.file(filePath);
       const blobStream = blob.createWriteStream({ resumable: false });
@@ -57,8 +83,11 @@ export class PhotosService {
       const publicUrl: any = await uploadPromise;
 
       const photo = this.photoRepository.create({
-        url: publicUrl,
         user: { id: userId },
+        url: publicUrl,
+        fileName: file.originalname,
+        description,
+        tags,
       });
 
       await this.photoRepository.save(photo);
